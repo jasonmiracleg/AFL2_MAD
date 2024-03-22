@@ -1,6 +1,8 @@
 entrypoint = "main.swift"
 
+compile = "swiftc -o main main.swift ./Class/*.swift"
 modules = ["swift"]
+run = "./main"
 
 [nix]
 channel = "stable-23_05"
