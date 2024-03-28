@@ -126,6 +126,15 @@ struct Game{
     print("As you enter the forest, you feel a sense of unease wash over you.")
     print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll emerging from the shadows.")
     battle_template()
+  }
+
+  func battle_template(){
+    print("😈 Name : ")
+    print("😈 Health : ")
+    print("Choose your action: ")
+    print("[1] Physical Attack. No mana required. Deal 5pt of damage.")
+    print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
+    print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
     print("\n[4] Use Potion to heal wounds.")
     print("[5] Scan enemy's vital.")
     print("[6] Flee from battlle.")
@@ -148,14 +157,5 @@ struct Game{
           print("Invalid choice")
       }
     }
-  }
-
-  func battle_template(){
-    print("😈 Name : ")
-    print("😈 Health : ")
-    print("Choose your action: ")
-    print("[1] Physical Attack. No mana required. Deal 5pt of damage.")
-    print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
-    print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
   }
 }

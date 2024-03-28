@@ -1,15 +1,12 @@
 struct Player{
-  var name:String
-  var health_point = 100
-  var mana_point = 50
-  var max_hp = 100
-  var max_mana = 50
-  var is_alive = true
+  let name: String
+  var health_point: Int = 100
+  var mana_point: Int = 50
+  var attack: Int = 0
+  let max_hp: Int = 100
+  let max_mana: Int = 50
+  var is_alive: Bool = true
   var items = [Item(item_name : "Potion", amount : 0), Item(item_name : "Elixir", amount : 20)]
-  
-  func attack(target:Player){
-    
-  }
   
   mutating func use_item(item: Item){
     if item.item_name == "Potion"{
@@ -31,10 +28,10 @@ struct Player{
     }
   }
 
-  func check_status(){
-    print("Player name: \(name)")
-    print("\nHP: \(health_point)/\(max_hp)")
-    print("MP: \(mana_point)/\(max_mana)")
+  func check_status(player current_Figure : Figure){
+    print("Player name: \(player.name)")
+    print("\nHP: \(player.health_point)/\(player.max_hp)")
+    print("MP: \(player.mana_point)/\(player.max_mana)")
     print("\nMagic :")
     print("- Physical Attack. No mana required. Deal 5pt of damage.")
     print("- Meteor. Use 15 pt of MP. Deal 50pt of damage.")
