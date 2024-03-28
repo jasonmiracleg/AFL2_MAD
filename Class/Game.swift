@@ -69,7 +69,7 @@ struct Game{
           case "M":
             print("")
           case "Q":
-            print("")
+            break
           default:
             print("Input Invalid")
         }
@@ -82,6 +82,11 @@ struct Game{
     if let potion = player.items.first(where: { $0.item_name == "Potion" }) {
       if potion.amount <= 0 {
         print("You don't have any potion left. be careful of your next journey. Press [return] to go back: ", terminator: "")
+        if let input = readLine(){
+          if input.isEmpty {
+            break
+          }
+        }
       } else {
         if player.health_point == 100 {
           print("⛔️ WARNING ⛔️ Using potion while your HP is 100 will not affect your HP, yet the potion amount will be deducted")
@@ -115,5 +120,42 @@ struct Game{
       }
     }
     return true
+  }
+
+  func forest(player : inout Player){
+    print("As you enter the forest, you feel a sense of unease wash over you.")
+    print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll emerging from the shadows.")
+    battle_template()
+    print("\n[4] Use Potion to heal wounds.")
+    print("[5] Scan enemy's vital.")
+    print("[6] Flee from battlle.")
+    print("Your choice? ", terminator: "")
+    if let input = readLine() {
+      switch input{
+        case "1":
+          print("")
+        case "2":
+          print("")
+        case "3":
+          print("")
+        case "4":
+          healing_screen(player: &player)
+        case "5":
+          print("")
+        case "6":
+          print("")
+        default:
+          print("Invalid choice")
+      }
+    }
+  }
+
+  func battle_template(){
+    print("😈 Name : ")
+    print("😈 Health : ")
+    print("Choose your action: ")
+    print("[1] Physical Attack. No mana required. Deal 5pt of damage.")
+    print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
+    print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
   }
 }

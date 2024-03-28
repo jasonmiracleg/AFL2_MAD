@@ -5,7 +5,7 @@ struct Player{
   var max_hp = 100
   var max_mana = 50
   var is_alive = true
-  var items = [Item(item_name : "Potion", amount : 20), Item(item_name : "Elixir", amount : 20)]
+  var items = [Item(item_name : "Potion", amount : 0), Item(item_name : "Elixir", amount : 20)]
   
   func attack(target:Player){
     
