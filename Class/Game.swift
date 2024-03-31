@@ -81,12 +81,14 @@ struct Game{
     print("Your HP is \(player.health_point)")
     if let potion = player.items.first(where: { $0.item_name == "Potion" }) {
       if potion.amount <= 0 {
-        print("You don't have any potion left. be careful of your next journey. Press [return] to go back: ", terminator: "")
-        if let input = readLine(){
-          if input.isEmpty {
-            break
+        repeat {
+          print("You don't have any potion left. be careful of your next journey. Press [return] to go back: ", terminator: "")
+          if let input = readLine(){
+            if input.isEmpty {
+              break
+            }
           }
-        }
+        } while true
       } else {
         if player.health_point == 100 {
           print("⛔️ WARNING ⛔️ Using potion while your HP is 100 will not affect your HP, yet the potion amount will be deducted")
@@ -125,10 +127,10 @@ struct Game{
   func forest(player : inout Player){
     print("As you enter the forest, you feel a sense of unease wash over you.")
     print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll emerging from the shadows.")
-    battle_template()
+    battle_template(player : &player)
   }
 
-  func battle_template(){
+  func battle_template(player : inout Player){
     print("😈 Name : ")
     print("😈 Health : ")
     print("Choose your action: ")

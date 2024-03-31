@@ -9,11 +9,11 @@ class Queue<T>{
     return elements.count
   }
 
-  mutating func enqueue(_ element: T){
+  func enqueue(_ element: T){
     elements.append(element)
   }
 
-  mutating func dequeue() -> T?{
+  func dequeue() -> T?{
     guard !isEmpty else { return nil }
     return elements.removeFirst()
   }

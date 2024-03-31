@@ -6,13 +6,6 @@ protocol Figure{
   var is_alive : Bool {get set}
   var level : Int {get set}
 
-  func attack(attacker: Figure, rival: Figure, damage : Int)
-  func check_status(current_figure : Figure)
-}
-
-extension Figure{
-  func attack(attacker: Figure, rival: Figure, damage : Int){
-    print("\(attacker.name) attacks \(rival.name) with \(damage) damage")
-    rival.health_point -= damage
-  }
+  func attack(attacker: Figure, rival: inout Figure, damage : Int)
+  func check_status()
 }
