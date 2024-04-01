@@ -41,6 +41,7 @@ struct Game{
   }
 
   func journey_screen(player : inout Player){
+    var enemies = Queue<Monster>()
     repeat{
       print("From here, you can...")
       print("\n[C]heck your health and stats")
@@ -65,9 +66,9 @@ struct Game{
           case "H":
             healing_screen(player: &player)
           case "F":
-            print("")
+            forest_screen(player: &player, &enemies)
           case "M":
-            print("")
+            mountain_screen(player: &player, &enemies)
           case "Q":
             break
           default:
@@ -124,40 +125,83 @@ struct Game{
     return true
   }
 
-  func forest(player : inout Player){
+  func mountain_screen(player: inout Player,_ enemies : inout Queue<Monster>){
+    let initial_enemy = Int.random(in: 1...3)
+    for _ in 1...initial_enemy {
+      enemies.enqueue(Monster(name: "Golem"))
+    }
+    print("As you make your way through the rugged mountain terrain, you can feel the chill of the wind biting at your skin. Suddenly, you hear a sound that makes you freeze in your tracks. That's when you see it -  a massive, snarling Golem(s) emerging from the shadows.")
+    battle_template(player : &player, &enemies)
+  }
+  
+  func forest_screen(player : inout Player,_ enemies : inout Queue<Monster>){
+    let initial_enemy = Int.random(in: 1...3)
+    for _ in 1...initial_enemy {
+      enemies.enqueue(Monster(name: "Troll"))
+    }
     print("As you enter the forest, you feel a sense of unease wash over you.")
-    print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll emerging from the shadows.")
-    battle_template(player : &player)
+    print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll(s) emerging from the shadows.")
+    battle_template(player : &player, &enemies)
   }
 
-  func battle_template(player : inout Player){
-    print("😈 Name : ")
-    print("😈 Health : ")
-    print("Choose your action: ")
-    print("[1] Physical Attack. No mana required. Deal 5pt of damage.")
-    print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
-    print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
-    print("\n[4] Use Potion to heal wounds.")
-    print("[5] Scan enemy's vital.")
-    print("[6] Flee from battlle.")
-    print("Your choice? ", terminator: "")
-    if let input = readLine() {
-      switch input{
-        case "1":
-          print("")
-        case "2":
-          print("")
-        case "3":
-          print("")
-        case "4":
-          healing_screen(player: &player)
-        case "5":
-          print("")
-        case "6":
-          print("")
-        default:
-          print("Invalid choice")
+  func battle_template(player : inout Player,_ enemies : inout Queue<Monster>){
+    var turn = 1
+    repeat {
+      if let monster = enemies.dequeue() {
+        var current_monster = monster as Figure
+        print("😈 Name : \(current_monster.name) \(enemies.count)")
+        print("😈 Health : \(current_monster.health_point)/\(current_monster.max_hp)")
+        print("Choose your action: ")
+        print("[1] Physical Attack. No mana required. Deal \(player.attack) pt of damage.")
+        print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
+        print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
+        print("\n[4] Use Potion to heal wounds.")
+        print("[5] Scan enemy's vital.")
+        print("[6] Flee from battlle.")
+        print("Your choice? ", terminator: "")
+        if let input = readLine() {
+          switch input{
+            case "1":
+              player.attack(attacker: player, rival: &current_monster, damage: player.attack)
+            case "2":
+              if player.mana_point >= 15 {
+                player.attack(attacker: player, rival: &current_monster, damage: 50)
+              } else {
+                print("Enable to cast a meteor because of insufficient mana")
+              }
+            case "3":
+              player.use_shield()
+            case "4":
+              healing_screen(player: &player)
+            case "5":
+              current_monster.check_status()
+            case "6":
+              flee_screen()
+              return
+            default:
+              print("Invalid choice")
+          }
+        }
+      } else {
+        print("You Won!")
+        player.level_up()
+        break
       }
-    }
+      turn += 1
+    } while true
+  }
+
+  func flee_screen(){
+    print("You feel that if you don't escape soon, you won't be able to continue the fight. You look around frantically, searching for a way out. You sprint towards the exit, your heart pounding in your chest")
+    print("You're safe, for now.")
+    print("Press [return] to continue:")
+    repeat {
+      if let input = readLine(){
+        if input.isEmpty {
+          break
+        }
+      }
+      print("\n")
+    } while true
   }
 }

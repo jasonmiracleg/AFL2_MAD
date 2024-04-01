@@ -26,6 +26,8 @@ class FloodBender : Player, Mastery {
       rival.health_point -= 50
       if rival.health_point < 0 {
         rival.health_point = 0
+        rival.is_alive = false
+        super.defeated_enemy += 1
       }
       energy -= max_energy
       print("You used your ultimate ability, \(ultimate_name)! You dealt 50 damage to \(rival.name)!")

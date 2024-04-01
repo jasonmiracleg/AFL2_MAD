@@ -26,6 +26,8 @@ class NatureWarden : Player, Mastery {
       rival.health_point -= 30
       if rival.health_point < 0 {
         rival.health_point = 0
+        rival.is_alive = false
+        self.defeated_enemy += 1
       }
       energy -= max_energy
       print("You used your ultimate ability, \(ultimate_name)! You dealt 30 damage to \(rival.name)!")

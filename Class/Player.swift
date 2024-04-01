@@ -12,6 +12,7 @@ class Player : Figure {
   var pet : Pet?
   var defeated_enemy : Int
   var has_mastered = false
+  var shield_on = false
 
   init(name: String, attack: Int, max_hp: Int, health_point: Int, is_alive: Bool, level: Int,mana_point: Int, max_mana: Int, stonecy: Int, defeated_enemy : Int, items: [Item]){
     self.name = name
@@ -76,6 +77,11 @@ class Player : Figure {
   func attack(attacker: Figure, rival: inout Figure, damage : Int) {
     print("\(attacker.name) attacks \(rival.name) with \(damage) damage")
     rival.health_point -= damage
+    if rival.health_point < 0 {
+      rival.health_point = 0
+      rival.is_alive = false
+      self.defeated_enemy += 1
+    }
   }
   
   func check_status() {
@@ -109,6 +115,15 @@ class Player : Figure {
       self.level += 1
       self.max_hp += 10*self.level
       self.health_point = self.max_hp
+    }
+  }
+
+  func use_shield(){
+    if self.mana_point >= 10 {
+      self.mana_point -= 10
+      self.shield_on = true
+    } else {
+      print("Enable to use shield because of insufficient mana")
     }
   }
   
