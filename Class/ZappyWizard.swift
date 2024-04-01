@@ -9,16 +9,7 @@ class ZappyWizard : Player, Mastery {
     self.energy = 0
     self.ultimate_name = "Thunderstorm"
     self.skill_energy = 60
-    super.init(name: player.name,
-                 attack: player.attack,
-                 max_hp: player.max_hp,
-                 health_point: player.health_point,
-                 is_alive: player.is_alive,
-                 level: player.level,
-                 mana_point: player.mana_point,
-                 max_mana: player.max_mana,
-                 stonecy: player.stonecy,
-                 items: player.items)
+    super.init(name: player.name, attack: player.attack, max_hp: player.max_hp, health_point: player.health_point, is_alive: player.is_alive, level: player.level, mana_point: player.mana_point, max_mana: player.max_mana, stonecy: player.stonecy, defeated_enemy : player.defeated_enemy, items: player.items)
   }
 
   override func attack(attacker: Figure, rival: inout Figure, damage : Int) {
@@ -50,6 +41,19 @@ class ZappyWizard : Player, Mastery {
         rival.health_point = 0
       }
       print("You used your follow-up attack! You dealt 25 damage to \(rival.name)!")
+    }
+  }
+
+  override func level_up(){
+    if self.defeated_enemy % 4 == 0 {    
+      if self.level == 5 {
+        return
+      }
+      self.level += 1
+      self.attack += 2*self.level
+      if self.level == 4{
+        self.attack += 2
+      }
     }
   }
 }

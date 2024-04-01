@@ -10,22 +10,25 @@ class Player : Figure {
   var stonecy : Int // currency
   var items : [Item]
   var pet : Pet?
+  var defeated_enemy : Int
+  var has_mastered = false
 
-  init(name: String, attack: Int, max_hp: Int, health_point: Int, is_alive: Bool, level: Int,mana_point: Int, max_mana: Int, stonecy: Int, items: [Item]){
+  init(name: String, attack: Int, max_hp: Int, health_point: Int, is_alive: Bool, level: Int,mana_point: Int, max_mana: Int, stonecy: Int, defeated_enemy : Int, items: [Item]){
     self.name = name
     self.mana_point = 50
-    self.attack = 10
+    self.attack = 5
     self.health_point = 100
     self.max_hp = 100
     self.max_mana = 50
     self.is_alive = true
     self.level = 1
     self.stonecy = 10
+    self.defeated_enemy = 0
     self.items = [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)]
   }
   
   convenience init(name: String){
-    self.init(name: name, attack: 10, max_hp: 100, health_point: 100, is_alive: true, level: 1, mana_point: 50, max_mana: 50, stonecy: 10, items: [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)])
+    self.init(name: name, attack: 10, max_hp: 100, health_point: 100, is_alive: true, level: 1, mana_point: 50, max_mana: 50, stonecy: 10, defeated_enemy : 0, items: [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)])
   }
   
   func use_item(item: Item){
@@ -80,7 +83,7 @@ class Player : Figure {
     print("\nHP: \(self.health_point)/\(self.max_hp)")
     print("MP: \(self.mana_point)/\(self.max_mana)")
     print("\nMagic :")
-    print("- Physical Attack. No mana required. Deal 5pt of damage.")
+    print("- Physical Attack. No mana required. Deal \(self.attack) of damage.")
     print("- Meteor. Use 15 pt of MP. Deal 50pt of damage.")
     print("- Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
     print("\nItems: ")
@@ -98,6 +101,17 @@ class Player : Figure {
     }
   }
 
+  func level_up(){
+    if self.defeated_enemy % 4 == 0 && self.defeated_enemy > 3 {    
+      if self.level == 3 {
+        return
+      }
+      self.level += 1
+      self.max_hp += 10*self.level
+      self.health_point = self.max_hp
+    }
+  }
+  
   func acquire_new_pet(_ new_pet : Pet){
     self.pet = new_pet
   }
