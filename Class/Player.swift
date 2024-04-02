@@ -77,7 +77,7 @@ class Player : Figure {
   func attack(attacker: Figure, rival: inout Figure, damage : Int) {
     print("\(attacker.name) attacks \(rival.name) with \(damage) damage")
     rival.health_point -= damage
-    if rival.health_point < 0 {
+    if rival.health_point <= 0 {
       rival.health_point = 0
       rival.is_alive = false
       self.defeated_enemy += 1
@@ -85,7 +85,7 @@ class Player : Figure {
   }
   
   func check_status() {
-    print("Player name: \(self.name)")
+    print("\nPlayer name: \(self.name)")
     print("\nHP: \(self.health_point)/\(self.max_hp)")
     print("MP: \(self.mana_point)/\(self.max_mana)")
     print("\nMagic :")

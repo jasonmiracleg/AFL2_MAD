@@ -34,12 +34,13 @@ struct Pet : Figure {
     }
   }
 
-  mutating func heal(player: inout Figure){
+  mutating func heal(player: inout Player){
     if case let .Healer(healing_point) = self.role{
       player.health_point += healing_point
       if player.health_point > player.max_hp{
         player.health_point = player.max_hp
       }
+      print("\(name) restores \(healing_point) HP")
     }
   }
 

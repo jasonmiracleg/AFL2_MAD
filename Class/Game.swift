@@ -70,7 +70,7 @@ struct Game{
           case "M":
             mountain_screen(player: &player, &enemies)
           case "Q":
-            break
+            return
           default:
             print("Input Invalid")
         }
@@ -130,7 +130,7 @@ struct Game{
     for _ in 1...initial_enemy {
       enemies.enqueue(Monster(name: "Golem"))
     }
-    print("As you make your way through the rugged mountain terrain, you can feel the chill of the wind biting at your skin. Suddenly, you hear a sound that makes you freeze in your tracks. That's when you see it -  a massive, snarling Golem(s) emerging from the shadows.")
+    print("\nAs you make your way through the rugged mountain terrain, you can feel the chill of the wind biting at your skin. Suddenly, you hear a sound that makes you freeze in your tracks. That's when you see it -  a massive, snarling Golem(s) emerging from the shadows.\n")
     battle_template(player : &player, &enemies)
   }
   
@@ -139,8 +139,8 @@ struct Game{
     for _ in 1...initial_enemy {
       enemies.enqueue(Monster(name: "Troll"))
     }
-    print("As you enter the forest, you feel a sense of unease wash over you.")
-    print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll(s) emerging from the shadows.")
+    print("\nAs you enter the forest, you feel a sense of unease wash over you.")
+    print("Suddenly, you hear the sound of twigs snapping behind you. you quickly spin around, and find a Troll(s) emerging from the shadows.\n")
     battle_template(player : &player, &enemies)
   }
 
@@ -149,50 +149,104 @@ struct Game{
     repeat {
       if let monster = enemies.dequeue() {
         var current_monster = monster as Figure
-        print("😈 Name : \(current_monster.name) \(enemies.count)")
-        print("😈 Health : \(current_monster.health_point)/\(current_monster.max_hp)")
-        print("Choose your action: ")
-        print("[1] Physical Attack. No mana required. Deal \(player.attack) pt of damage.")
-        print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
-        print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
-        print("\n[4] Use Potion to heal wounds.")
-        print("[5] Scan enemy's vital.")
-        print("[6] Flee from battlle.")
-        print("Your choice? ", terminator: "")
-        if let input = readLine() {
-          switch input{
-            case "1":
-              player.attack(attacker: player, rival: &current_monster, damage: player.attack)
-            case "2":
-              if player.mana_point >= 15 {
-                player.attack(attacker: player, rival: &current_monster, damage: 50)
-              } else {
-                print("Enable to cast a meteor because of insufficient mana")
-              }
-            case "3":
-              player.use_shield()
-            case "4":
-              healing_screen(player: &player)
-            case "5":
-              current_monster.check_status()
-            case "6":
-              flee_screen()
-              return
-            default:
-              print("Invalid choice")
+        repeat {
+          if player.pet != nil && turn % 2 == 0 && turn >= 2{
+            var current_pet = player.pet!
+            current_pet.attack(attacker : current_pet, rival : &current_monster, damage : current_monster.attack)
+            current_pet.heal(player: &player)
           }
+          battle_information(current_monster: current_monster, player: player, enemies : enemies)
+          if let input = readLine() {
+            switch input.uppercased() {
+              case "1":
+                player.attack(attacker: player, rival: &current_monster, damage: player.attack)
+              case "2":
+                if player.mana_point >= 15 {
+                  player.attack(attacker: player, rival: &current_monster, damage: 50)
+                  player.mana_point -= 15
+                } else {
+                  print("Enable to cast a meteor because of insufficient mana")
+                }
+              case "3":
+                player.use_shield()
+              case "4":
+                healing_screen(player: &player)
+              case "5":
+              if let elixirItem = player.items.first(where: { $0.item_name == "Elixir" }) {
+                if elixirItem.amount <= 0 {
+                  print("Insufficient Elixir")
+                } else {
+                  player.use_item(item: elixirItem)
+                }
+              } 
+              case "6":
+                current_monster.check_status()
+              case "7":
+                flee_screen()
+                return
+              case "S":
+                if var ascendedPlayer = player as? AscendedPlayer {
+                  ascendedPlayer.launch_skill(player: &ascendedPlayer)
+                } else {
+                  print("Invalid choice")
+                }
+              case "U":
+                if let ascendedPlayer = player as? AscendedPlayer {
+                  ascendedPlayer.launch_ultimate(rival: &current_monster)
+                } else {
+                  print("Invalid choice")
+                }
+              default:
+                print("Invalid choice")
+                continue
+            }
+            print("\n")
+          }
+          if !player.shield_on {
+            var attacked_player = player as Figure
+            current_monster.attack(attacker: current_monster, rival: &attacked_player, damage: current_monster.attack)
+          } else {
+            print("Successfully blocked the attack")
+          }
+          if turn % 5 && player.level >= 3 && !current_monster.has_summoned {
+            enemies.enqueue(current_monster.summon_backup(name: current_monster.name))
+          }
+          turn += 1
+        } while current_monster.is_alive && player.is_alive
+        if !player.is_alive {
+          print("You have been defeated by the \(current_monster.name)")
+          player.health_point = player.max_hp
+          print("You've been resurrected")
+          break
         }
       } else {
-        print("You Won!")
+        print("You Won!\n")
         player.level_up()
         break
       }
-      turn += 1
     } while true
   }
 
+  func battle_information(current_monster : Figure, player : Player, enemies : Queue<Monster>){
+    print("😈 Name : \(current_monster.name) Lv. \(current_monster.level)| Remaining \(enemies.count)x")
+    print("😈 Health : \(current_monster.health_point)/\(current_monster.max_hp)")
+    print("Choose your action: ")
+    print("[1] Physical Attack. No mana required. Deal \(player.attack) pt of damage.")
+    print("[2] Meteor. Use 15 pt of MP. Deal 50pt of damage.")
+    print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
+    if let ascendedPlayer = player as? AscendedPlayer {
+      print("[S] Skill \(ascendedPlayer.skill_name). Use \(ascendedPlayer.skill_energy) Energy")
+      print("[U] Ultimate \(ascendedPlayer.ultimate_name). Use \(ascendedPlayer.skill_energy) Energy")
+    }
+    print("\n[4] Use Potion to heal wounds.")
+    print("[5] Use Elixir to gain mana.")
+    print("[6] Scan enemy's vital.")
+    print("[7] Flee from battle.")
+    print("Your choice? ", terminator: "")
+  }
+
   func flee_screen(){
-    print("You feel that if you don't escape soon, you won't be able to continue the fight. You look around frantically, searching for a way out. You sprint towards the exit, your heart pounding in your chest")
+    print("\nYou feel that if you don't escape soon, you won't be able to continue the fight. You look around frantically, searching for a way out. You sprint towards the exit, your heart pounding in your chest")
     print("You're safe, for now.")
     print("Press [return] to continue:")
     repeat {
