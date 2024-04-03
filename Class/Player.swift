@@ -14,64 +14,67 @@ class Player : Figure {
   var has_mastered = false
   var shield_on = false
 
-  init(name: String, attack: Int, max_hp: Int, health_point: Int, is_alive: Bool, level: Int,mana_point: Int, max_mana: Int, stonecy: Int, defeated_enemy : Int, items: [Item]){
+  init(name: String, attack: Int, max_hp: Int, health_point: Int, is_alive: Bool, level: Int, mana_point: Int, max_mana: Int, stonecy: Int, defeated_enemy : Int, items: [Item]){
     self.name = name
-    self.mana_point = 50
-    self.attack = 5
-    self.health_point = 100
-    self.max_hp = 100
-    self.max_mana = 50
-    self.is_alive = true
-    self.level = 1
-    self.stonecy = 10
-    self.defeated_enemy = 0
+    self.mana_point = mana_point
+    self.attack = attack
+    self.health_point = health_point
+    self.max_hp = max_hp
+    self.max_mana = max_mana
+    self.is_alive = is_alive
+    self.level = level
+    self.stonecy = stonecy
+    self.defeated_enemy = defeated_enemy
     self.items = [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)]
   }
   
   convenience init(name: String){
-    self.init(name: name, attack: 10, max_hp: 100, health_point: 100, is_alive: true, level: 1, mana_point: 50, max_mana: 50, stonecy: 10, defeated_enemy : 0, items: [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)])
+    self.init(name: name, attack: 10, max_hp: 100, health_point: 100, is_alive: true, level: 1, mana_point: 50, max_mana: 50, stonecy: 100, defeated_enemy : 0, items: [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)])
   }
   
-  func use_item(item: Item){
+  func use_item(item: inout Item){
     if item.item_name == "Potion"{
       self.health_point += 20
       if health_point > max_hp {
         self.health_point = max_hp
       }
+      item.amount -= 1
     } else if item.item_name == "Elixir"{
       self.mana_point += 10
       if mana_point > max_mana {
         self.mana_point = max_mana
       }
-    }
-    for index in items.indices {
-        if items[index].item_name == item.item_name {
-            items[index].amount -= 1
-            break
-        }
+      item.amount -= 1
     }
   }
 
-  func buy_item(item: Item, shop : inout Shop) -> Bool {
-    if stonecy < item.price {
+  func buy_item(at index : Int, shop : inout Shop) -> Bool {
+    guard index >= 0 && index < shop.items.count else {
+      print("The chosen item is not available")
       return false
     }
-    if let index = shop.items.firstIndex(where: { $0.item_name == item.item_name }) {
-      stonecy -= item.price
-      if shop.items[index].amount == 0{
-        return false
-      }
-      shop.items[index].amount -= 1
-      if item.item_name == "Potion" {
-          items[0].amount += 1
-      } else if item.item_name == "Elixir" {
-          items[1].amount += 1
-      } else {
-          items[2].amount += 1
-      }
-      return true
+    let selected_item = shop.items[index]
+    if stonecy < selected_item.price {
+      print("Not enough stonecy to buy \(selected_item.item_name)")
+      return false
     }
-    return false
+    stonecy -= selected_item.price
+    if selected_item.amount == 0 {
+      print("\(selected_item.item_name) is out of stock")
+      return false
+    }
+    shop.items[index].amount -= 1
+    switch selected_item.item_name {
+    case "Potion":
+      items[0].amount += 1
+    case "Elixir":
+      items[1].amount += 1
+    case "Energy Botol":
+      items[3].amount += 1
+    default:
+      break
+    }
+    return true
   }
 
   func attack(attacker: Figure, rival: inout Figure, damage : Int) {
@@ -96,6 +99,8 @@ class Player : Figure {
     for item in self.items {
       if item.item_name == "Energy Botol" && self.level < 3 {
         return
+      } else if item.item_name == "Pet Egg" {
+        return
       }
       print("\(item.item_name) x \(item.amount). ", terminator: ""); if item.item_name == "Potion" {
         print("Heal 20pt of your HP")
@@ -108,13 +113,18 @@ class Player : Figure {
   }
 
   func level_up(){
-    if self.defeated_enemy % 4 == 0 && self.defeated_enemy > 3 {    
-      if self.level == 3 {
-        return
+    if !has_mastered {
+      if self.defeated_enemy % 4 == 0 && self.defeated_enemy > 3 {    
+        if self.level == 3 {
+          has_mastered = true
+          return
+        }
+        self.level += 1
+        self.max_hp += 10*self.level
+        self.health_point = self.max_hp
+        self.attack += 2*self.level
+        print("You have leveled up")
       }
-      self.level += 1
-      self.max_hp += 10*self.level
-      self.health_point = self.max_hp
     }
   }
 
@@ -126,16 +136,15 @@ class Player : Figure {
       print("Enable to use shield because of insufficient mana")
     }
   }
-  
-  func acquire_new_pet(_ new_pet : Pet){
-    self.pet = new_pet
-  }
 
   func train_pet(){
     if self.pet == nil{
+      print("You don't have any pet")
       return
     } else {
       self.pet!.knowledge += 1
+      self.pet!.level_up()
+      print("You have you trained your pet. \(self.pet!.name) gained 1 knowledge point")
     }
   }
 }

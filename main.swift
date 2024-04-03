@@ -1,2 +1,2 @@
 var games = Game()
-games.gameplay()
+games.opening_scene()

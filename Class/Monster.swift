@@ -42,8 +42,6 @@ struct Monster : Figure {
   }
 
   func summon_backup(name : String) -> Monster{
-    let backup = Monster(name: "Summoned \(name)", max_hp : 50)
-    has_summoned = true
-    return backup
+    return Monster(name: "Summoned \(name)", max_hp : 50)
   }
 }
