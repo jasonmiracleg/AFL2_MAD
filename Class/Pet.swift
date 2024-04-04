@@ -26,7 +26,7 @@ struct Pet : Figure {
   
   func attack(attacker: Figure, rival: inout Figure, damage : Int) {
     if case let .Offender(bonus_attack) = self.role {
-      print("\(attacker.name) attacks \(rival.name) with \(damage) damage")
+      print("\n\(attacker.name) attacks \(rival.name) with \(damage) damage")
       rival.health_point -= damage + bonus_attack
       if (rival.health_point < 0){
         rival.health_point = 0
@@ -40,7 +40,7 @@ struct Pet : Figure {
       if player.health_point > player.max_hp{
         player.health_point = player.max_hp
       }
-      print("\(name) restores \(healing_point) HP")
+      print("\n\(name) restores \(healing_point) HP")
     }
   }
 
@@ -54,17 +54,22 @@ struct Pet : Figure {
       case .Healer(var healing_point):
           healing_point = self.level*healing_point
           self.role = .Healer(healing_point: healing_point)
+          print("\n\(self.name) could heal \(healing_point) from now on")
       case .Offender(let bonus_attack):
           attack += self.level*bonus_attack
+          print("\n\(self.name) gain +\(self.level*bonus_attack) attack")
       }
-      print("\(self.name) has leveled up")
+      print("\u{001B}[33m\(self.name) has leveled up\u{001B}[0m")
     }
   }
   
-  func check_status(player : Player) {
+  func check_status() {
     print("🙉 Pet name: \(self.name) Lv. \(self.level)", terminator : " "); if self.level == 3 {print("(Max)", terminator : "")}
     print("\n🙉 HP: \(self.health_point)/\(self.max_hp)")
-    print("🙉 Current Knowledge :  \(self.knowledge)")
+    if case .Offender = self.role {
+      print("🙉 Attack: \(self.attack)")
+    }
+    print("🙉 Current Knowledge : \(self.knowledge)")
     switch self.role {
       case .Healer(let healing_point):
         print("Can help restoring your health by \(healing_point) point")

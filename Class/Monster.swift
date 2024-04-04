@@ -5,7 +5,7 @@ struct Monster : Figure {
   var health_point : Int
   var is_alive : Bool
   var level : Int
-  var has_summoned = false
+  var has_summoned : Bool
 
   init(name : String){ // Primary Monster
     self.name = name
@@ -14,6 +14,7 @@ struct Monster : Figure {
     self.max_hp = 200*self.level
     self.health_point = self.max_hp
     self.is_alive = true
+    self.has_summoned = false
   }
 
   init(name : String, max_hp : Int){ // Summoned Monster
@@ -41,7 +42,8 @@ struct Monster : Figure {
     print("😈 Attack : \(self.attack)")
   }
 
-  func summon_backup(name : String) -> Monster{
+  mutating func summon_backup(name : String) -> Monster{
+    self.has_summoned = true
     return Monster(name: "Summoned \(name)", max_hp : 50)
   }
 }

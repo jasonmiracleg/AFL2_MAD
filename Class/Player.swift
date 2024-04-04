@@ -9,7 +9,7 @@ class Player : Figure {
   let max_mana: Int
   var stonecy : Int // currency
   var items : [Item]
-  var pet : Pet?
+  var pet : Pet? = nil
   var defeated_enemy : Int
   var has_mastered = false
   var shield_on = false
@@ -25,11 +25,11 @@ class Player : Figure {
     self.level = level
     self.stonecy = stonecy
     self.defeated_enemy = defeated_enemy
-    self.items = [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)]
+    self.items = items
   }
   
   convenience init(name: String){
-    self.init(name: name, attack: 10, max_hp: 100, health_point: 100, is_alive: true, level: 1, mana_point: 50, max_mana: 50, stonecy: 100, defeated_enemy : 0, items: [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)])
+    self.init(name: name, attack: 10, max_hp: 100, health_point: 100, is_alive: true, level: 2, mana_point: 50, max_mana: 50, stonecy: 50, defeated_enemy : 3, items: [Item(item_name : "Potion", amount : 5, price : 15), Item(item_name : "Elixir", amount : 10, price : 20), Item(item_name : "Energy Botol", amount : 0, price : 35)])
   }
   
   func use_item(item: inout Item){
@@ -38,14 +38,14 @@ class Player : Figure {
       if health_point > max_hp {
         self.health_point = max_hp
       }
-      item.amount -= 1
+      items[0].amount -= 1
     } else if item.item_name == "Elixir"{
       self.mana_point += 10
       if mana_point > max_mana {
         self.mana_point = max_mana
       }
-      item.amount -= 1
-    }
+      items[1].amount -= 1
+    } 
   }
 
   func buy_item(at index : Int, shop : inout Shop) -> Bool {
@@ -70,7 +70,7 @@ class Player : Figure {
     case "Elixir":
       items[1].amount += 1
     case "Energy Botol":
-      items[3].amount += 1
+      items[2].amount += 1
     default:
       break
     }
@@ -113,18 +113,16 @@ class Player : Figure {
   }
 
   func level_up(){
-    if !has_mastered {
-      if self.defeated_enemy % 4 == 0 && self.defeated_enemy > 3 {    
-        if self.level == 3 {
-          has_mastered = true
-          return
-        }
-        self.level += 1
-        self.max_hp += 10*self.level
-        self.health_point = self.max_hp
-        self.attack += 2*self.level
-        print("You have leveled up")
+    if self.defeated_enemy % 4 == 0 && self.defeated_enemy > 3 {    
+      if self.level == 3 {
+        has_mastered = true
+        return
       }
+      self.level += 1
+      self.max_hp += 10*self.level
+      self.health_point = self.max_hp
+      self.attack += 2*self.level
+      print("\n\u{001B}[33mYou have leveled up\u{001B}[0m\n")
     }
   }
 
@@ -133,18 +131,18 @@ class Player : Figure {
       self.mana_point -= 10
       self.shield_on = true
     } else {
-      print("Enable to use shield because of insufficient mana")
+      print("\nEnable to use shield because of insufficient mana")
     }
   }
 
   func train_pet(){
     if self.pet == nil{
-      print("You don't have any pet")
+      print("\nYou don't have any pet")
       return
     } else {
       self.pet!.knowledge += 1
       self.pet!.level_up()
-      print("You have you trained your pet. \(self.pet!.name) gained 1 knowledge point")
+      print("\nYou have you trained your pet. \(self.pet!.name) gained 1 knowledge point")
     }
   }
 }

@@ -1,5 +1,5 @@
 struct Game{
-  var shop : Shop
+  var shop : Shop 
   
   init(){
     shop = Shop()
@@ -42,8 +42,8 @@ struct Game{
   }
 
   mutating func journey_screen(player : inout Player){
-    var enemies = Queue<Monster>()
     repeat{
+      var enemies = Queue<Monster>()
       print("From here, you can...")
       print("\n[C]heck your health and stats")
       print("[H]eal your wounds with potion")
@@ -87,36 +87,40 @@ struct Game{
   }
 
   func healing_screen(player: inout Player){
-    print("Your HP is \(player.health_point)")
-    if var potion = player.items.first(where: { $0.item_name == "Potion" }) {
+    print("\nYour HP is \(player.health_point)")
+    if let potionIndex = player.items.firstIndex(where: { $0.item_name == "Potion" }) {
+      var potion = player.items[potionIndex]
       if potion.amount <= 0 {
         repeat {
-          print("You don't have any potion left. be careful of your next journey. Press [return] to go back: ", terminator: "")
-          if let input = readLine(){
-            if input.isEmpty {
-              break
-            }
+          print("You don't have any potion left. Be careful on your next journey. Press [return] to go back: ", terminator: "")
+          if let input = readLine(), input.isEmpty {
+            break
           }
         } while true
       } else {
-        if player.health_point == 100 {
-          print("⛔️ WARNING ⛔️ Using potion while your HP is 100 will not affect your HP, yet the potion amount will be deducted")
-        }
-        repeat {
-          print("You have \(potion.amount) Potions")
-          print("Are you sure want to use 1 potion to heal wound? [Y/N] ", terminator: "")
-          if let input = readLine(){
-            if input.uppercased() == "Y"{
-              player.use_item(item: &potion)
-              print("\nYour HP is now : \(player.health_point)")
-              print("\nYou have \(potion.amount) Potion(s) left")
-              print("\n")
-            } else if input.uppercased() == "N" {
-              break
+          if player.health_point == player.max_hp {
+            print("⛔️ WARNING ⛔️ Using a potion while your HP is maxed out will not affect your HP, yet the potion amount will be deducted")
+          }
+          repeat {
+            print("You have \(potion.amount) Potion(s)")
+            print("Are you sure you want to use 1 potion to heal your wounds? [Y/N] ", terminator: "")
+            if let input = readLine() {
+              if input.uppercased() == "Y" {
+                player.use_item(item: &potion)
+                print("\nYour HP is now: \(player.health_point)")
+                potion.amount-=1
+                if potion.amount <= 0 {
+                  print("You don't have any potion left. Be careful on your next journey. Press [return] to go back: ", terminator: "")
+                  break
+                }
+              } else if input.uppercased() == "N" {
+                break
+              }
             }
-          }    
-        } while true
+          } while true
       }
+    } else {
+      print("You don't have any potions.")
     }
     print("\n")
   }
@@ -134,6 +138,7 @@ struct Game{
   }
 
   mutating func shop_screen(player: inout Player){
+    print("\nCurrent Stonecy : \(player.stonecy)")
     self.shop.final_update(player: player)
     shop_loop : repeat {
       self.shop.show_stocks()
@@ -175,7 +180,7 @@ struct Game{
       repeat {
         print("Pet Role : ")
         print("1. Healer (Heals 10% based on your pet's max HP)")
-        print("2. Offender (Attacks enemy with 50% based on your attack)")
+        print("2. Offender (Attacks enemy with 50% based on pet's attack)")
         print("Select a role : ", terminator: "")
         if let input = readLine(), let role = Int(input){
           if role == 1 {
@@ -282,23 +287,37 @@ struct Game{
               case "7":
                 flee_screen()
                 return
+              case "E":
+              if var elixirItem = player.items.first(where: { $0.item_name == "Elixir" }) {
+                if player.has_mastered{
+                  if elixirItem.amount <= 0 {
+                    print("Insufficient Elixir")
+                  } else {
+                    player.use_item(item: &elixirItem)
+                  }
+                } else {
+                  print("Invalid choice")
+                  continue
+                }
+              } 
               case "S":
                 if var ascendedPlayer = player as? AscendedPlayer {
                   ascendedPlayer.launch_skill(player: &ascendedPlayer)
                 } else {
                   print("Invalid choice")
+                  continue
                 }
               case "U":
                 if let ascendedPlayer = player as? AscendedPlayer {
                   ascendedPlayer.launch_ultimate(rival: &current_monster)
                 } else {
                   print("Invalid choice")
+                  continue
                 }
               default:
                 print("Invalid choice")
                 continue
             }
-            print("\n")
           }
           if !player.shield_on {
             var attacked_player = player as Figure
@@ -306,17 +325,24 @@ struct Game{
           } else {
             print("Successfully blocked the attack")
           }
-          if turn % 5 == 0 && player.level >= 3 && !(current_monster as! Monster).has_summoned {
-            let backup_monster = (current_monster as! Monster).summon_backup(name: current_monster.name)
-            enemies.enqueue(backup_monster)
+          if turn % 5 == 0 && player.level >= 3 {
+            if var monster = current_monster as? Monster {
+              if !monster.has_summoned {
+                let backup_monster = monster.summon_backup(name: monster.name)
+                enemies.enqueue(backup_monster)
+                current_monster = monster as Figure
+              }
+            }
           }
           turn += 1
           player.level_up()
+          player = evolve(player: player)
         } while current_monster.is_alive && player.is_alive
         if !player.is_alive {
           print("You have been defeated by the \(current_monster.name)")
           player.health_point = player.max_hp
           print("You've been resurrected")
+          player.is_alive = true
           player.stonecy += 15
           print("You've gained 5 stonecy")
           break
@@ -324,8 +350,9 @@ struct Game{
       } else {
         print("You Won!\n")
         player.level_up()
+        player = evolve(player: player)
         player.stonecy += 50
-        print("You've gained 50 stonecy")
+        print("You've gained 50 stonecy\n")
         break
       }
     } while true
@@ -346,7 +373,8 @@ struct Game{
     print("[3] Shield. Use 10 pt of MP. Block enemy's attack in 1 turn.")
     if let ascendedPlayer = player as? AscendedPlayer {
       print("[S] Skill \(ascendedPlayer.skill_name). Use \(ascendedPlayer.skill_energy) Energy")
-      print("[U] Ultimate \(ascendedPlayer.ultimate_name). Use \(ascendedPlayer.skill_energy) Energy")
+      print("[U] Ultimate \(ascendedPlayer.ultimate_name). Use \(ascendedPlayer.max_energy) Energy")
+      print("[E] Energize. Gain 20 Energy")
     }
     print("\n[4] Use Potion to heal wounds.")
     print("[5] Use Elixir to gain mana.")
@@ -367,5 +395,26 @@ struct Game{
       }
       print("\n")
     } while true
+  }
+
+  func evolve(player : Player) -> Player {
+    if player.level >= 3 && !player.has_mastered {
+      print("\nYou have reached level 3")
+      print("You may select mastery skill")
+      print("1. Floody Bender - Mana Generation Skill")
+      print("2. Nature Warden - Healing Skill")
+      print("Your choice : ")
+      if let input = readLine(), let choice = Int(input){
+        switch choice{
+          case 1:
+            return AscendedPlayer(player : player, speciality : .FloodyBender, pet : player.pet)
+          case 2:
+            return AscendedPlayer(player : player, speciality : .NatureWarden, pet : player.pet)
+          default:
+            print("Invalid choice")
+        }
+      }
+    }
+    return player
   }
 }
